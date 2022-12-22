@@ -2,10 +2,10 @@
 set -e
 
 # Usage: ./collect-trace.sh <project-name> <task-name> <trace-file-prefix>
-# Example: ./collect-trace.sh sample1-1app-1lib-1dep :app:distZip bop-trace
+# Example: ./collect-trace.sh sample1-1app-1lib-1dep distZip _trace/trace
 
 DEFAULT_PROJECT="sample1-1app-1lib-1dep"
-DEFAULT_TASK=":app:distZip"
+DEFAULT_TASK="distZip"
 DEFAULT_TRACE_PREFIX="_trace/trace"
 
 # Function to print a command before running
@@ -26,12 +26,13 @@ exe ./gradlew clean
 WRAPPER_VERSION="$(./gradlew --version | grep 'Gradle ' | awk '{print $2}')"
 exe pkill -f "GradleDaemon $WRAPPER_VERSION" || true
 
-# Remove the temporary Gradle home to make sure artifact transform results are not cached on disk
-EMPTY_GRADLE_HOME="empty-gradle-home"
-exe rm -rf "./$EMPTY_GRADLE_HOME"
+# Clean the temporary Gradle home to make sure artifact transform results are not cached on disk
+EMPTY_GRADLE_HOME="fresh-gradle-home"
+exe rm -rf "./$EMPTY_GRADLE_HOME/caches" "./$EMPTY_GRADLE_HOME/daemon"
 
 # Run task and collect build operations
-exe ./gradlew --console=plain --no-build-cache -g $EMPTY_GRADLE_HOME "$TASK" -Dorg.gradle.internal.operations.trace="$PWD/$TRACE_PREFIX"
+exe ./gradlew --console=plain --no-build-cache -g $EMPTY_GRADLE_HOME "$TASK" \
+  -Dorg.gradle.internal.operations.trace="$PWD/$TRACE_PREFIX"
 
 echo
 echo "Collected trace files in $PWD"

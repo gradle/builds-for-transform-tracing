@@ -8,5 +8,5 @@ build
 .idea
 
 # Ignore temporary files
-empty-gradle-home
+fresh-gradle-home
 _trace
