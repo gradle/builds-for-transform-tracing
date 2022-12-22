@@ -6,7 +6,7 @@ set -e
 
 DEFAULT_PROJECT="sample1-1app-1lib-1dep"
 DEFAULT_TASK=":app:distZip"
-DEFAULT_TRACE_PREFIX="bop-trace"
+DEFAULT_TRACE_PREFIX="_trace/trace"
 
 # Function to print a command before running
 # shellcheck disable=SC2145
@@ -35,6 +35,6 @@ exe ./gradlew --console=plain --no-build-cache -g $EMPTY_GRADLE_HOME "$TASK" -Do
 
 echo
 echo "Collected trace files in $PWD"
-find . -name "$TRACE_PREFIX*"
+find . -path "*$TRACE_PREFIX*"
 
 cd - >/dev/null
