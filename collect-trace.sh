@@ -7,6 +7,7 @@ set -e
 DEFAULT_PROJECT="sample1-1app-1lib-1dep"
 DEFAULT_TASK="distZip"
 DEFAULT_TRACE_PREFIX="_trace/trace"
+GRADLE_CMD="${GRADLE_CMD:-./gradlew}"
 
 # Function to print a command before running
 # shellcheck disable=SC2145
@@ -20,7 +21,7 @@ TRACE_PREFIX="${3:-$DEFAULT_TRACE_PREFIX}"
 cd "$(dirname "$0")/$PROJECT"
 
 # Make sure no local artifact transform results are present
-exe ./gradlew clean
+exe "$GRADLE_CMD" clean
 
 # Kill all Gradle daemons to make sure nothing is cached in memory
 WRAPPER_VERSION="$(./gradlew --version | grep 'Gradle ' | awk '{print $2}')"
@@ -31,7 +32,7 @@ EMPTY_GRADLE_HOME="fresh-gradle-home"
 exe rm -rf "./$EMPTY_GRADLE_HOME/caches" "./$EMPTY_GRADLE_HOME/daemon"
 
 # Run task and collect build operations
-exe ./gradlew --console=plain --no-build-cache -g $EMPTY_GRADLE_HOME "$TASK" \
+exe "$GRADLE_CMD" --console=plain --no-build-cache -g $EMPTY_GRADLE_HOME "$TASK" \
   -Dorg.gradle.internal.operations.trace="$PWD/$TRACE_PREFIX"
 
 echo
