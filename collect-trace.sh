@@ -21,7 +21,7 @@ TRACE_PREFIX="${3:-$DEFAULT_TRACE_PREFIX}"
 STORAGE_DIR="$PWD/_trace"
 
 # Make sure no local artifact transform results are present
-exe "$GRADLE_CMD" clean
+exe "$GRADLE_CMD" --console=plain clean
 
 # Kill all Gradle daemons to make sure nothing is cached in memory
 WRAPPER_VERSION="$("$GRADLE_CMD" --version | grep 'Gradle ' | awk '{print $2}')"
@@ -40,11 +40,13 @@ exe "$GRADLE_CMD" --console=plain --no-build-cache -g $EMPTY_GRADLE_HOME "$TASK"
   --scan -Dscan.dump
   
 # Find and move scan dump
-find . -name "*.scan" -maxdepth 1 -exec mv -t "$STORAGE_DIR" {} +
-mv $STORAGE_DIR/*.scan $STORAGE_DIR/trace.scan
+# https://unix.stackexchange.com/a/305846
+find . -name "*.scan" -maxdepth 1 -exec mv {} "$STORAGE_DIR" \;
+# Change build scan name to a simple name
+mv "$STORAGE_DIR"/*.scan "$STORAGE_DIR"/trace.scan
  
 echo
 echo "Collected trace files:"
-find $STORAGE_DIR/*
+find "$STORAGE_DIR"/*
 
 cd - >/dev/null
