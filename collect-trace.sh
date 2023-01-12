@@ -21,11 +21,13 @@ TRACE_PREFIX="${3:-$DEFAULT_TRACE_PREFIX}"
 STORAGE_DIR="$PWD/_trace"
 EMPTY_GRADLE_HOME="fresh-gradle-home"
 
+GRADLE_CMD="$GRADLE_CMD -g $EMPTY_GRADLE_HOME"
+
 # Make sure no local artifact transform results are present
-exe "$GRADLE_CMD" -g $EMPTY_GRADLE_HOME --console=plain clean
+exe $GRADLE_CMD --console=plain clean
 
 # Kill all Gradle daemons to make sure nothing is cached in memory
-WRAPPER_VERSION="$("$GRADLE_CMD" --version | grep 'Gradle ' | awk '{print $2}')"
+WRAPPER_VERSION="$($GRADLE_CMD --version | grep 'Gradle ' | awk '{print $2}')"
 exe pkill -f "GradleDaemon $WRAPPER_VERSION" || true
 
 # Clean the temporary Gradle home to make sure artifact transform results are not cached on disk
@@ -37,7 +39,7 @@ exe find "./$EMPTY_GRADLE_HOME/caches" -mindepth 1 ! -name 'modules-2' -exec rm 
 exe rm -rf "$STORAGE_DIR"
 
 # Run task and collect build operations and build scan dump
-exe "$GRADLE_CMD" -g $EMPTY_GRADLE_HOME --console=plain --no-build-cache "$TASK" \
+exe $GRADLE_CMD --console=plain --no-build-cache "$TASK" \
   -Dorg.gradle.internal.operations.trace="$STORAGE_DIR/$TRACE_PREFIX" \
   --scan -Dscan.dump
 
