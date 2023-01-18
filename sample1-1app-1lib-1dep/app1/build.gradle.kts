@@ -16,13 +16,16 @@ application {
 }
 
 val artifactType = Attribute.of("artifactType", String::class.java)
+val unrelated = Attribute.of("unrelated", Boolean::class.javaObjectType)
 val renamed = Attribute.of("renamed", Boolean::class.javaObjectType)
 dependencies {
     attributesSchema {
         attribute(renamed)
+        attribute(unrelated)
     }
     artifactTypes.getByName("jar") {
         attributes.attribute(renamed, false)
+        attributes.attribute(unrelated, false)
     }
 }
 
@@ -30,6 +33,7 @@ configurations.all {
     afterEvaluate {
         if (isCanBeResolved) {
             attributes.attribute(renamed, true)
+            attributes.attribute(unrelated, false)
         }
     }
 }
