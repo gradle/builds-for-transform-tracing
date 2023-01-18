@@ -16,15 +16,15 @@ application {
 }
 
 val artifactType = Attribute.of("artifactType", String::class.java)
-val renamed = Attribute.of("renamed", Boolean::class.javaObjectType)
+val multiplied = Attribute.of("multiplied", Boolean::class.javaObjectType)
 val postfixed = Attribute.of("postfixed", Boolean::class.javaObjectType)
 dependencies {
     attributesSchema {
-        attribute(renamed)
+        attribute(multiplied)
         attribute(postfixed)
     }
     artifactTypes.getByName("jar") {
-        attributes.attribute(renamed, false)
+        attributes.attribute(multiplied, false)
         attributes.attribute(postfixed, false)
     }
 }
@@ -38,20 +38,20 @@ configurations.all {
 }
 
 dependencies {
-    registerTransform(Renamer::class) {
-        from.attribute(renamed, false).attribute(artifactType, "jar")
-        to.attribute(renamed, true).attribute(artifactType, "jar")
+    registerTransform(Multiplier::class) {
+        from.attribute(multiplied, false).attribute(artifactType, "jar")
+        to.attribute(multiplied, true).attribute(artifactType, "jar")
 
         parameters {
-            postfix = "-renamed"
+            count = 2
         }
     }
 }
 
-abstract class Renamer : TransformAction<Renamer.Parameters> {
+abstract class Multiplier : TransformAction<Multiplier.Parameters> {
     interface Parameters : TransformParameters {
         @get:Input
-        var postfix: String
+        var count: Int
     }
 
     @get:PathSensitive(PathSensitivity.NAME_ONLY)
@@ -60,17 +60,19 @@ abstract class Renamer : TransformAction<Renamer.Parameters> {
 
     override fun transform(outputs: TransformOutputs) {
         Thread.sleep(600)
-        val postfix = parameters.postfix
+        val count = parameters.count
         val inputFile = inputArtifact.get().asFile
-        val outputFile = outputs.file(inputFile.nameWithoutExtension + postfix + ".jar")
-        inputFile.copyTo(outputFile)
-        println("Renamed ${inputFile.name} to ${outputFile.name}")
+        for (i in 1..count) {
+            val outputFile = outputs.file(inputFile.nameWithoutExtension + "-copy-$i.jar")
+            inputFile.copyTo(outputFile)
+            println("Multiplied ${inputFile.name} into ${outputFile.name}")
+        }
     }
 }
 
 dependencies {
     registerTransform(Postfixer::class) {
-        from.attribute(renamed, true).attribute(artifactType, "jar")
+        from.attribute(multiplied, true).attribute(artifactType, "jar")
         from.attribute(postfixed, false).attribute(artifactType, "jar")
         to.attribute(postfixed, true).attribute(artifactType, "jar")
 
