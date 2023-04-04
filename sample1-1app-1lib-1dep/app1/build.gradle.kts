@@ -59,6 +59,9 @@ abstract class Renamer : TransformAction<Renamer.Parameters> {
     @get:InputArtifact
     abstract val inputArtifact: Provider<FileSystemLocation>
 
+    @get:InputArtifactDependencies
+    abstract val dependencies: FileCollection
+
     override fun transform(outputs: TransformOutputs) {
         val postfix = parameters.postfix
         val inputFile = inputArtifact.get().asFile
